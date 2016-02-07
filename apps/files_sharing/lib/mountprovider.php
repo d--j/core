@@ -28,6 +28,7 @@ use OCP\Files\Config\IMountProvider;
 use OCP\Files\Storage\IStorageFactory;
 use OCP\IConfig;
 use OCP\IUser;
+use OCP\Share\IManager;
 
 class MountProvider implements IMountProvider {
 	/**
@@ -36,10 +37,17 @@ class MountProvider implements IMountProvider {
 	protected $config;
 
 	/**
-	 * @param \OCP\IConfig $config
+	 * @var IManager
 	 */
-	public function __construct(IConfig $config) {
+	protected $shareProvider;
+
+	/**
+	 * @param \OCP\IConfig $config
+	 * @param IManager $shareProvider
+	 */
+	public function __construct(IConfig $config, IManager $shareProvider) {
 		$this->config = $config;
+		$this->shareProvider = $shareProvider;
 	}
 
 
