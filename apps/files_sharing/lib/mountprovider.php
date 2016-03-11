@@ -39,15 +39,15 @@ class MountProvider implements IMountProvider {
 	/**
 	 * @var IManager
 	 */
-	protected $shareProvider;
+	protected $shareManager;
 
 	/**
 	 * @param \OCP\IConfig $config
 	 * @param IManager $shareProvider
 	 */
-	public function __construct(IConfig $config, IManager $shareProvider) {
+	public function __construct(IConfig $config, IManager $shareManager) {
 		$this->config = $config;
-		$this->shareProvider = $shareProvider;
+		$this->shareManager = $shareManager;
 	}
 
 
@@ -63,15 +63,19 @@ class MountProvider implements IMountProvider {
 		$shares = array_filter($shares, function ($share) {
 			return $share['permissions'] > 0;
 		});
-		$shares = array_map(function ($share) use ($user, $storageFactory) {
+		$manager = $this->shareManager;
+		$shares = array_map(function ($share) use ($user, $storageFactory, $manager) {
+
+			$newShare = $manager->getShareById('ocinternal:'.$share['id']);
 
 			return new SharedMount(
 				'\OC\Files\Storage\Shared',
 				'/' . $user->getUID() . '/' . $share['file_target'],
-				array(
+				[
 					'share' => $share,
-					'user' => $user->getUID()
-				),
+					'user' => $user->getUID(),
+					'newShare' => $newShare,
+				],
 				$storageFactory
 			);
 		}, $shares);
