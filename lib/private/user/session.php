@@ -32,6 +32,7 @@
 namespace OC\User;
 
 use OC\Hooks\Emitter;
+use OCP\IUser;
 use OCP\IUserSession;
 
 /**
@@ -170,7 +171,12 @@ class Session implements IUserSession, Emitter {
 	 * @return bool if logged in
 	 */
 	public function isLoggedIn() {
-		return $this->getUser() !== null;
+		$user = $this->getUser();
+		if (is_null($user)) {
+			return false;
+		}
+
+		return $user->isEnabled();
 	}
 
 	/**
@@ -229,7 +235,7 @@ class Session implements IUserSession, Emitter {
 						throw new LoginException('Login canceled by app');
 					}
 				} else {
-					return false;
+					throw new LoginException('User disabled');
 				}
 			}
 		} else {
