@@ -241,3 +241,11 @@ Feature: webdav-related
 			| 0 |
 			| 1 |
 			| 3 |
+
+		Scenario: A disabled user cannot use webdav
+			Given user "userToBeDisabled" exists
+			And As an "admin"
+			And user "userToBeDisabled" is disabled
+			When Downloading file "/welcome.txt" as "userToBeDisabled"
+			Then the HTTP status code should be "503"
+

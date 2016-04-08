@@ -373,5 +373,16 @@ trait WebDav {
 		$this->makeDavRequest($user, 'PUT', $file, ['OC-Chunked' => '1'], $data);
 	}
 
+	/**
+	 * @Given /^Downloading file "([^"]*)" as "([^"]*)"$/
+	 */
+	public function downloadingFileAs($fileName, $user) {
+		try {
+			$this->response = $this->makeDavRequest($user, 'GET', $fileName, []);
+		} catch (\GuzzleHttp\Exception\ServerException $ex) {
+			$this->response = $ex->getResponse();
+		}
+	}
+
 }
 
