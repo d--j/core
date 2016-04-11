@@ -53,7 +53,7 @@ class Local extends \OC\Files\Storage\Common {
 	}
 
 	public function mkdir($path) {
-		return @mkdir($this->getSourcePath($path), 0777, true);
+		return mkdir($this->getSourcePath($path), 0777, true);
 	}
 
 	public function rmdir($path) {

@@ -417,6 +417,14 @@ class Jail extends Wrapper {
 
 	/**
 	 * @param string $path
+	 * @return array
+	 */
+	public function getMetaData($path) {
+		return $this->storage->getMetaData($this->getSourcePath($path));
+	}
+
+	/**
+	 * @param string $path
 	 * @param int $type \OCP\Lock\ILockingProvider::LOCK_SHARED or \OCP\Lock\ILockingProvider::LOCK_EXCLUSIVE
 	 * @param \OCP\Lock\ILockingProvider $provider
 	 * @throws \OCP\Lock\LockedException
