@@ -53,11 +53,6 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	 */
 	private $ownerView;
 
-	/**
-	 * @var string
-	 */
-	private $user;
-
 	private $initialized = false;
 
 	/**
@@ -78,7 +73,6 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	public function __construct($arguments) {
 		$this->share = $arguments['share'];
 		$this->ownerView = $arguments['ownerView'];
-		$this->user = $arguments['user'];
 		$this->logger = \OC::$server->getLogger();
 		$this->newShare = $arguments['newShare'];
 
