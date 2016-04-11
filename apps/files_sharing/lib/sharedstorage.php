@@ -207,18 +207,6 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 		return false;
 	}
 
-	public function stat($path) {
-		if ($path == '' || $path == '/') {
-			$stat['size'] = $this->filesize($path);
-			$stat['mtime'] = $this->filemtime($path);
-			return $stat;
-		} else if ($source = $this->getSourcePath($path)) {
-			list($storage, $internalPath) = \OC\Files\Filesystem::resolvePath($source);
-			return $storage->stat($internalPath);
-		}
-		return false;
-	}
-
 	public function filetype($path) {
 		if ($path == '' || $path == '/') {
 			return 'dir';
@@ -227,12 +215,6 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 			return $storage->filetype($internalPath);
 		}
 		return false;
-	}
-
-	public function filesize($path) {
-		$source = $this->getSourcePath($path);
-		list($storage, $internalPath) = \OC\Files\Filesystem::resolvePath($source);
-		return $storage->filesize($internalPath);
 	}
 
 	public function isCreatable($path) {
@@ -263,14 +245,6 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 			return false;
 		}
 		return ($this->getPermissions($path) & \OCP\Constants::PERMISSION_SHARE);
-	}
-
-	public function file_exists($path) {
-		if ($path == '' || $path == '/') {
-			return true;
-		}
-
-		return $this->newShare->getNode()->nodeExists($path);
 	}
 
 	public function file_get_contents($path) {
@@ -421,8 +395,7 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 				'mode' => $mode,
 			);
 			\OCP\Util::emitHook('\OC\Files\Storage\Shared', 'fopen', $info);
-			list($storage, $internalPath) = \OC\Files\Filesystem::resolvePath($source);
-			return $storage->fopen($internalPath, $mode);
+			return parent::fopen($path, $mode);
 		}
 		return false;
 	}
@@ -559,7 +532,7 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	}
 
 	public function getOwner($path) {
-		$this->newShare->getNode()->getOwner()->getUID();
+		return $this->newShare->getShareOwner();
 	}
 
 	public function getETag($path) {
