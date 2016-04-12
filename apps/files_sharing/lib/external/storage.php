@@ -52,7 +52,8 @@ class Storage extends DAV implements ISharedStorage {
 	private $certificateManager;
 	/** @var bool */
 	private $updateChecked = false;
-
+	/** @var  array */
+	private $shareInfo = [];
 	/**
 	 * @var \OCA\Files_Sharing\External\Manager
 	 */
@@ -277,6 +278,11 @@ class Storage extends DAV implements ISharedStorage {
 	 * @throws \Exception
 	 */
 	public function getShareInfo() {
+
+		if (!empty($this->shareInfo)) {
+			return $this->shareInfo;
+		}
+
 		$remote = $this->getRemote();
 		$token = $this->getToken();
 		$password = $this->getPassword();
@@ -305,7 +311,9 @@ class Storage extends DAV implements ISharedStorage {
 			throw new StorageNotAvailableException();
 		}
 
-		return json_decode($response->getBody(), true);
+		$this->shareInfo = json_decode($response->getBody(), true);
+
+		return $this->shareInfo;
 	}
 
 	public function getOwner($path) {
@@ -318,6 +326,12 @@ class Storage extends DAV implements ISharedStorage {
 			return false;
 		}
 		return ($this->getPermissions($path) & \OCP\Constants::PERMISSION_SHARE);
+	}
+
+	public function getPermissions($path) {
+		$shareInfo = $this->getShareInfo();
+		$permissions = $shareInfo['data']['permissions'];
+		return $permissions;
 	}
 
 }
