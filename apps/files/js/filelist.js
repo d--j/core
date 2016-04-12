@@ -163,6 +163,11 @@
 		_sortComparator: null,
 
 		/**
+		 * Show/hide dot-files
+		 */
+		_showHiddenFiles: true,
+
+		/**
 		 * Whether to do a client side sort.
 		 * When false, clicking on a table header will call reload().
 		 * When true, clicking on a table header will simply resort the list.
@@ -231,6 +236,7 @@
 				this._detailsView.addDetailView(new OCA.Files.MainFileInfoDetailView({fileList: this, fileActions: this.fileActions}));
 			}
 
+			this.allFiles = [];
 			this.files = [];
 			this._selectedFiles = {};
 			this._selectionSummary = new OCA.Files.FileSummary();
@@ -293,8 +299,6 @@
 
 			if (!_.isUndefined(options.showHiddenFiles)) {
 				this._showHiddenFiles = options.showHiddenFiles;
-			} else {
-				this._showHiddenFiles = true;
 			}
 
 			OC.Plugins.attach('OCA.Files.FileList', this);
@@ -911,6 +915,15 @@
 
 		},
 
+		setShowHiddenFiles: function(show) {
+			if (show === this._showHiddenFiles) {
+				return;
+			}
+
+			this._showHiddenFiles = show;
+			this.setFiles(this.allFiles);
+		},
+
 		/**
 		 * Sets the files to be displayed in the list.
 		 * This operation will re-render the list and update the summary.
@@ -918,6 +931,7 @@
 		 */
 		setFiles: function(filesArray) {
 			var self = this;
+			this.allFiles = filesArray;
 			filesArray = this._filterHiddenFiles(filesArray);
 
 			// detach to make adding multiple rows faster

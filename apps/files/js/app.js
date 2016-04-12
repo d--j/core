@@ -45,6 +45,9 @@
 		 */
 		initialize: function() {
 			this.navigation = new OCA.Files.Navigation($('#app-navigation'));
+			var showHidden = $('#showHiddenFiles').val() === "1";
+			this.$showHiddenFiles = $('input#showhiddenfiles');
+			this.$showHiddenFiles.prop('checked', showHidden);
 
 			var urlParams = OC.Util.History.parseUrlQuery();
 			var fileActions = new OCA.Files.FileActions();
@@ -73,7 +76,7 @@
 					allowLegacyActions: true,
 					scrollTo: urlParams.scrollto,
 					filesClient: OC.Files.getClient(),
-					showHiddenFiles: $('#showHiddenFiles').val() === "1"
+					showHiddenFiles: showHidden
 				}
 			);
 			this.files.initialize();
@@ -151,6 +154,12 @@
 			$('#app-content').delegate('>div', 'changeViewerMode', _.bind(this._onChangeViewerMode, this));
 
 			$('#app-navigation').on('itemChanged', _.bind(this._onNavigationChanged, this));
+			this.$showHiddenFiles.on('change', _.bind(this._onShowHiddenFilesChange, this));
+		},
+
+		_onShowHiddenFilesChange: function() {
+			var show = this.$showHiddenFiles.is(':checked');
+			this.fileList.setShowHiddenFiles(show);
 		},
 
 		/**
