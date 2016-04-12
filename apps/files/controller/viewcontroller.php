@@ -31,6 +31,7 @@ use OCP\IL10N;
 use OCP\INavigationManager;
 use OCP\IRequest;
 use OCP\IURLGenerator;
+use OCP\IUserSession;
 use OCP\IConfig;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -54,6 +55,8 @@ class ViewController extends Controller {
 	protected $config;
 	/** @var EventDispatcherInterface */
 	protected $eventDispatcher;
+	/** @var IUserSession */
+	protected $userSession;
 
 	/**
 	 * @param string $appName
@@ -63,6 +66,7 @@ class ViewController extends Controller {
 	 * @param IL10N $l10n
 	 * @param IConfig $config
 	 * @param EventDispatcherInterface $eventDispatcherInterface
+	 * @param IUserSession $userSession
 	 */
 	public function __construct($appName,
 								IRequest $request,
@@ -70,7 +74,8 @@ class ViewController extends Controller {
 								INavigationManager $navigationManager,
 								IL10N $l10n,
 								IConfig $config,
-								EventDispatcherInterface $eventDispatcherInterface) {
+								EventDispatcherInterface $eventDispatcherInterface,
+								IUserSession $userSession) {
 		parent::__construct($appName, $request);
 		$this->appName = $appName;
 		$this->request = $request;
@@ -79,6 +84,7 @@ class ViewController extends Controller {
 		$this->l10n = $l10n;
 		$this->config = $config;
 		$this->eventDispatcher = $eventDispatcherInterface;
+		$this->userSession = $userSession;
 	}
 
 	/**
@@ -213,6 +219,8 @@ class ViewController extends Controller {
 		$params['mailNotificationEnabled'] = $this->config->getAppValue('core', 'shareapi_allow_mail_notification', 'no');
 		$params['mailPublicNotificationEnabled'] = $this->config->getAppValue('core', 'shareapi_allow_public_notification', 'no');
 		$params['allowShareWithLink'] = $this->config->getAppValue('core', 'shareapi_allow_links', 'yes');
+		$showHidden = (bool) $this->config->getUserValue($this->userSession->getUser()->getUID(), 'files', 'show_hidden', true);
+		$params['showHiddenFiles'] = $showHidden ? 1 : 0;
 		$params['appNavigation'] = $nav;
 		$params['appContents'] = $contentItems;
 		$this->navigationManager->setActiveEntry('files_index');

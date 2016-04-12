@@ -291,6 +291,12 @@
 				});
 			}
 
+			if (!_.isUndefined(options.showHiddenFiles)) {
+				this._showHiddenFiles = options.showHiddenFiles;
+			} else {
+				this._showHiddenFiles = true;
+			}
+
 			OC.Plugins.attach('OCA.Files.FileList', this);
 		},
 
@@ -912,6 +918,7 @@
 		 */
 		setFiles: function(filesArray) {
 			var self = this;
+			filesArray = this._filterHiddenFiles(filesArray);
 
 			// detach to make adding multiple rows faster
 			this.files = filesArray;
@@ -936,6 +943,21 @@
 			this.$fileList.trigger(jQuery.Event('updated'));
 			_.defer(function() {
 				self.$el.closest('#app-content').trigger(jQuery.Event('apprendered'));
+			});
+		},
+
+		/**
+		 * Filter hidden files of the given filesArray (dot-files)
+		 *
+		 * @param filesArray files to be filtered
+		 * @returns {array}
+		 */
+		_filterHiddenFiles: function(files) {
+			if (this._showHiddenFiles) {
+				return files;
+			}
+			return _.filter(files, function(file) {
+				return file.name.indexOf('.') !== 0;
 			});
 		},
 
