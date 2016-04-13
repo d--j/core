@@ -58,7 +58,7 @@ class UsersTest extends OriginalTest {
 		parent::tearDown();
 	}
 
-	protected function setup() {
+	protected function setUp() {
 		parent::setUp();
 
 		$this->userManager = $this->getMock('\OCP\IUserManager');
