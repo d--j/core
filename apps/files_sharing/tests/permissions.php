@@ -54,12 +54,8 @@ class Test_Files_Sharing_Permissions extends OCA\Files_sharing\Tests\TestCase {
 	/** @var Cache */
 	private $ownerCache;
 
-	/** @var \OCP\Share\IManager */
-	private $shareManager;
-
 	protected function setUp() {
 		parent::setUp();
-		$this->shareManager = \OC::$server->getShareManager();
 
 		self::loginHelper(self::TEST_FILES_SHARING_API_USER1);
 

@@ -450,4 +450,9 @@ class Jail extends Wrapper {
 	public function changeLock($path, $type, ILockingProvider $provider) {
 		$this->storage->changeLock($this->getSourcePath($path), $type, $provider);
 	}
+
+	public function resolvePath($path) {
+		$path = $this->getSourcePath($path);
+		return \OC\Files\Filesystem::resolvePath($path);
+	}
 }

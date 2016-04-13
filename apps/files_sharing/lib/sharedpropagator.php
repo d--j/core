@@ -38,7 +38,7 @@ class SharedPropagator extends Propagator {
 	public function propagateChange($internalPath, $time, $sizeDifference = 0) {
 		$source = $this->storage->getSourcePath($internalPath);
 		/** @var \OC\Files\Storage\Storage $storage */
-		list($storage, $sourceInternalPath) = \OC\Files\Filesystem::resolvePath($source);
+		list($storage, $sourceInternalPath) = $this->storage->resolvePath($internalPath);
 		return $storage->getPropagator()->propagateChange($sourceInternalPath, $time, $sizeDifference);
 	}
 }

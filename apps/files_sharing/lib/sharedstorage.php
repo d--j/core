@@ -65,6 +65,9 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	 */
 	private $sourceStorage;
 
+	/** @var string */
+	private $user;
+
 	/**
 	 * @var \OCP\ILogger
 	 */
@@ -75,6 +78,7 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 		$this->ownerView = $arguments['ownerView'];
 		$this->logger = \OC::$server->getLogger();
 		$this->newShare = $arguments['newShare'];
+		$this->user = $arguments['user'];
 
 		Filesystem::initMountPoints($this->newShare->getShareOwner());
 		$sourcePath = $this->ownerView->getPath($this->newShare->getNodeId());
@@ -226,6 +230,31 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	}
 
 	/**
+	 * see http://php.net/manual/en/function.rename.php
+	 *
+	 * @param string $path1
+	 * @param string $path2
+	 * @return bool
+	 */
+	public function rename($path1, $path2) {
+		$isPartFile = pathinfo($path1, PATHINFO_EXTENSION) === 'part';
+		$targetExists = $this->file_exists($path2);
+		$sameFodler = dirname($path1) === dirname($path2);
+
+		if ($targetExists || ($sameFodler && !$isPartFile)) {
+			if (!$this->isUpdatable('')) {
+				return false;
+			}
+		} else {
+			if (!$this->isCreatable('')) {
+				return false;
+			}
+		}
+
+		return parent::rename($path1, $path2);
+	}
+
+	/**
 	 * return mount point of share, relative to data/user/files
 	 *
 	 * @return string
@@ -329,6 +358,8 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	 * @return bool
 	 */
 	public function unshareStorage() {
+		\OC::$server->getShareManager()->deleteFromSelf($this->newShare, $this->user);
+		return true;
 		$result = true;
 		if (!empty($this->share['grouped'])) {
 			foreach ($this->share['grouped'] as $share) {
@@ -347,32 +378,8 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	 * @return array
 	 */
 	public function resolvePath($path) {
-		$source = $this->getOwner($path) . '/' . $path;
+		$source = '/' . $this->newShare->getShareOwner() . '/' . $this->getSourcePath($path);
 		return \OC\Files\Filesystem::resolvePath($source);
-	}
-
-	/**
-	 * @param \OCP\Files\Storage $sourceStorage
-	 * @param string $sourceInternalPath
-	 * @param string $targetInternalPath
-	 * @return bool
-	 */
-	public function copyFromStorage(\OCP\Files\Storage $sourceStorage, $sourceInternalPath, $targetInternalPath) {
-		/** @var \OCP\Files\Storage $targetStorage */
-		list($targetStorage, $targetInternalPath) = $this->resolvePath($targetInternalPath);
-		return $targetStorage->copyFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
-	}
-
-	/**
-	 * @param \OCP\Files\Storage $sourceStorage
-	 * @param string $sourceInternalPath
-	 * @param string $targetInternalPath
-	 * @return bool
-	 */
-	public function moveFromStorage(\OCP\Files\Storage $sourceStorage, $sourceInternalPath, $targetInternalPath) {
-		/** @var \OCP\Files\Storage $targetStorage */
-		list($targetStorage, $targetInternalPath) = $this->resolvePath($targetInternalPath);
-		return $targetStorage->moveFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
 	}
 
 	/**
@@ -440,4 +447,25 @@ class Shared extends \OC\Files\Storage\Wrapper\Jail implements ISharedStorage {
 	public function getSourceStorage() {
 		return $this->sourceStorage;
 	}
+
+	/**
+	 * @param \OCP\Files\Storage $sourceStorage
+	 * @param string $sourceInternalPath
+	 * @param string $targetInternalPath
+	 * @return bool
+	 */
+	public function copyFromStorage(\OCP\Files\Storage $sourceStorage, $sourceInternalPath, $targetInternalPath) {
+		return parent::copyFromStorage($sourceStorage, $sourceInternalPath, $this->getSourcePath($targetInternalPath));
+	}
+
+	/**
+	 * @param \OCP\Files\Storage $sourceStorage
+	 * @param string $sourceInternalPath
+	 * @param string $targetInternalPath
+	 * @return bool
+	 */
+	public function moveFromStorage(\OCP\Files\Storage $sourceStorage, $sourceInternalPath, $targetInternalPath) {
+		return parent::moveFromStorage($sourceStorage, $sourceInternalPath, $this->getSourcePath($targetInternalPath));
+	}
+
 }

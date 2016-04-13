@@ -271,6 +271,7 @@ class Helper {
 		$name = $pathinfo['filename'];
 		$dir = $pathinfo['dirname'];
 		$i = 2;
+		$ls = $view->getDirectoryContent($dir);
 		while ($view->file_exists($path) || in_array($path, $excludeList)) {
 			$path = Filesystem::normalizePath($dir . '/' . $name . ' ('.$i.')' . $ext);
 			$i++;
